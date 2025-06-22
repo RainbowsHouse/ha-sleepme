@@ -1,0 +1,21 @@
+{
+  "analysis.autoSearchPaths": false,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.tabSize": 4,
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "terminal.integrated.shell.linux": "/bin/bash",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "files.associations": {
+    "*.yaml": "home-assistant"
+  },
+  "python.languageServer": "None"
+}

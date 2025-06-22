@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "sleepme_state": "Sleep.me state",
+          "api_key": "Access Token",
+          "update_interval": "Status update interval"
+        },
+        "data_description": {
+          "api_key": "Sleep.me Personal Access Token",
+          "update_interval": "Minutes between status checks.  Sleep.me will only allow 10 requests per minute."
+        }
+      }
+    },
+    "error": {
+      "auth": "Invalid credentials",
+      "no_devices": "No valid Sleep.me devices",
+      "cannot_connect": "Cannot connect to Sleep.me"
+    }
+  }
+}

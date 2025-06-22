@@ -1,0 +1,13 @@
+{
+  "domain": "sleepme",
+  "name": "Sleep.me",
+  "after_dependencies": [],
+  "codeowners": ["@rainbowshouse"],
+  "config_flow": true,
+  "documentation": "https://github.com/rainbowshouse/ha-sleepme",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/rainbowshouse/ha-sleepme/issues",
+  "requirements": [],
+  "version": "0.0.1"
+}
