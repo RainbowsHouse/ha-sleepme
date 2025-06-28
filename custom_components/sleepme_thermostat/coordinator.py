@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import async_timeout
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.helpers.update_coordinator import UpdateFailed
 
-from .api import SleepmeApiClientAuthenticationError
-from .api import SleepmeApiClientError
+from .api import SleepmeApiClientAuthenticationError, SleepmeApiClientError
 from .const import LOGGER
-from .data import SleepmeConfigEntry
+
+if TYPE_CHECKING:
+    from .data import SleepmeConfigEntry
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -30,8 +30,9 @@ class SleepmeDataUpdateCoordinator(DataUpdateCoordinator):
         )
         self.data[device_id]["control"] = control
 
-    async def _async_setup(self):
-        """Set up the coordinator
+    async def _async_setup(self) -> None:
+        """
+        Set up the coordinator.
 
         This is the place to set up your coordinator,
         or to load data, that only needs to be loaded once.
@@ -52,16 +53,17 @@ class SleepmeDataUpdateCoordinator(DataUpdateCoordinator):
             # handled by the data update coordinator.
             async with async_timeout.timeout(10):
                 for device in self._devices:
-                    id = device["id"]
-                    data = await api.async_get_device_state(id)
-
-                    results[id] = {**device, **data}
-
+                    device_id = device["id"]
+                    data = await api.async_get_device_state(device_id)
+                    results[device_id] = data
                     LOGGER.info(
-                        f"Device {device['name']} state: {json.dumps(results[id], indent=2)}"
+                        f"Device {device['name']} state: "
+                        f"{json.dumps(results[device_id], indent=2)}"
                     )
-            return results
         except SleepmeApiClientAuthenticationError as exception:
             raise ConfigEntryAuthFailed(exception) from exception
         except SleepmeApiClientError as exception:
-            raise UpdateFailed(exception) from exception
+            LOGGER.error(f"Error fetching data: {exception}")
+            raise
+        else:
+            return results

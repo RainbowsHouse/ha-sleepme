@@ -1,24 +1,34 @@
-"""Sleep.me Entity class"""
+"""Sleep.me Entity class."""
+
+from typing import Any
 
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import ATTRIBUTION
-from .const import DOMAIN
-from .const import NAME
+from .const import ATTRIBUTION, DOMAIN, NAME
+from .coordinator import SleepmeDataUpdateCoordinator
+from .data import SleepmeConfigEntry
 
 
 class SleepmeEntity(CoordinatorEntity):
-    def __init__(self, coordinator, config_entry):
+    """Sleep.me Entity base class."""
+
+    def __init__(
+        self,
+        coordinator: SleepmeDataUpdateCoordinator,
+        config_entry: SleepmeConfigEntry,
+    ) -> None:
+        """Initialize the entity."""
         super().__init__(coordinator)
         self.config_entry = config_entry
 
     @property
-    def unique_id(self):
+    def unique_id(self) -> str:
         """Return a unique ID to use for this entity."""
         return self.config_entry.entry_id
 
     @property
-    def device_info(self):
+    def device_info(self) -> dict[str, Any]:
+        """Return device information."""
         data = self.coordinator.data[self.config_entry.entry_id]
         about_data = data.get("about")
         control_data = data.get("control")
@@ -36,7 +46,7 @@ class SleepmeEntity(CoordinatorEntity):
         }
 
     @property
-    def device_state_attributes(self):
+    def device_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
         data = self.coordinator.data[self.config_entry.entry_id]
         status_data = data.get("status")
@@ -47,24 +57,18 @@ class SleepmeEntity(CoordinatorEntity):
             "brightness_level": status_data.get("brightness_level"),
         }
 
-    async def async_turn_on(self):
-        """Turn the device on.
-
-        Example method how to request data updates.
+    async def async_turn_on(self) -> None:
         """
-        # Do the turning on.
-        # ...
+        Turn the device on.
 
-        # Update the data
+        This method should be implemented by subclasses.
+        """
         await self.coordinator.async_request_refresh()
 
-    async def async_turn_off(self):
-        """Turn the device off.
-
-        Example method how to request data updates.
+    async def async_turn_off(self) -> None:
         """
-        # Do the turning off.
-        # ...
+        Turn the device off.
 
-        # Update the data
+        This method should be implemented by subclasses.
+        """
         await self.coordinator.async_request_refresh()

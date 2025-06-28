@@ -1,4 +1,4 @@
-"""Sample API Client."""
+"""Sleep.me API client module."""
 
 from __future__ import annotations
 
@@ -15,6 +15,8 @@ from .rate_limiter import RateLimiter
 
 TIMEOUT = 10
 
+# Constants
+RATE_LIMIT_STATUS_CODE = 429
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -50,7 +52,7 @@ def _verify_response_or_raise(response: aiohttp.ClientResponse) -> None:
         raise SleepmeApiClientAuthenticationError(
             msg,
         )
-    if response.status == 429:
+    if response.status == RATE_LIMIT_STATUS_CODE:
         msg = "Rate limit exceeded"
         raise SleepmeApiClientRateLimitError(
             msg,
@@ -76,6 +78,8 @@ class SleepmeDeviceState:
 
 
 class SleepmeApiClient:
+    """Sleep.me API client for interacting with the Sleep.me service."""
+
     def __init__(
         self,
         api_key: str,
@@ -94,7 +98,7 @@ class SleepmeApiClient:
     async def async_get_devices(self) -> list[dict]:
         """Get devices from the API."""
         url = "https://api.developer.sleep.me/v1/devices"
-        devices = cast(list[dict], await self.api_wrapper("get", url))
+        devices = cast("list[dict]", await self.api_wrapper("get", url))
 
         return [
             device
@@ -123,14 +127,16 @@ class SleepmeApiClient:
             "patch", url, data={"thermal_control_status": mode}
         )
 
-    async def api_wrapper(self, method: str, url: str, data: dict = {}) -> dict:
+    async def api_wrapper(
+        self, method: str, url: str, data: dict | None = None
+    ) -> dict:
         """Get information from the API."""
+        if data is None:
+            data = {}
         headers = HEADERS.copy()
         headers["Authorization"] = f"Bearer {self._api_key}"
 
         if not self._rate_limiter.can_send_request():
-            # wait for rate limit to reset
-            # await self._rate_limiter.wait_for_reset()
             LOGGER.info("Rate limit exceeded")
 
         try:
