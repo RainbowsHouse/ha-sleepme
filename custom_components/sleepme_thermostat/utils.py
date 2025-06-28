@@ -1,6 +1,11 @@
 """Utils."""
 
-from .const import UNIQUE_ID_POSTFIX
+from .const import DOMAIN, UNIQUE_ID_POSTFIX
+
+
+def get_device_id(name: str):
+    """Returns a prefixed device ID."""
+    return f"{DOMAIN}_{name}"
 
 
 def add_unique_id_postfix(unique_id):

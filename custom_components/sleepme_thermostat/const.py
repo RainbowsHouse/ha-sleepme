@@ -8,7 +8,7 @@ LOGGER: Logger = getLogger(__package__)
 # Base component constants
 NAME = "Sleep.me"
 VERSION = "0.0.1"
-DOMAIN = "sleepme"
+DOMAIN = "sleepme_thermostat"
 
 ATTRIBUTION = "Data provided by https://sleep.me/"
 ISSUE_URL = "https://github.com/rainbowshouse/ha-sleepme/issues"

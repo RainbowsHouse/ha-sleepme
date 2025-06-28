@@ -40,7 +40,7 @@ class SleepmeSensor(CoordinatorEntity, SensorEntity):
         self.idx = idx
         self._sensor_type = sensor_type
         self._name = f"{coordinator.data[idx]['name']} {SENSOR_TYPES[sensor_type]}"
-        self._unique_id = f"{coordinator.data[idx]['id']}_{sensor_type}"
+        self._unique_id = f"{idx}_{sensor_type}"
         self._state = None
 
         LOGGER.info(
