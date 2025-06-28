@@ -1,9 +1,4 @@
-"""
-Custom integration to integrate Sleep.me with Home Assistant.
-
-For more details about this integration, please refer to
-https://github.com/rainbowshouse/ha-sleepme
-"""
+"""Sleep.me Thermostat integration for Home Assistant."""
 
 from __future__ import annotations
 
@@ -11,16 +6,12 @@ import json
 from datetime import timedelta
 from typing import TYPE_CHECKING
 
-from homeassistant.const import CONF_API_KEY
-from homeassistant.const import Platform
+from homeassistant.const import CONF_API_KEY, Platform
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.loader import async_get_loaded_integration
 
 from .api import SleepmeApiClient
-from .const import CONF_UPDATE_INTERVAL
-from .const import DOMAIN
-from .const import LOGGER
-from .const import STARTUP_MESSAGE
+from .const import CONF_UPDATE_INTERVAL, DOMAIN, LOGGER, STARTUP_MESSAGE
 from .coordinator import SleepmeDataUpdateCoordinator
 from .data import SleepmeData
 
