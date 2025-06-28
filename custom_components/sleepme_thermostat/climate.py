@@ -9,7 +9,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .api import SleepmeApiClient
 from .const import LOGGER
 from .coordinator import SleepmeDataUpdateCoordinator
 from .data import SleepmeConfigEntry
@@ -23,29 +22,20 @@ async def async_setup_entry(
     """Set up Sleep.me climate devices from a config entry."""
     coordinator = config_entry.runtime_data.coordinator
 
-    devices = coordinator.data
-    LOGGER.debug(f"Climate Devices: {devices}")
-
-    async_add_entities(
-        [SleepmeClimate(coordinator, idx) for idx, ent in coordinator.data.items()]
-    )
+    async_add_entities([SleepmeClimate(coordinator, idx) for idx in coordinator.data])
 
 
 class SleepmeClimate(CoordinatorEntity, ClimateEntity):
     """Sleep.me Climate Entity."""
 
-    coordinator: SleepmeDataUpdateCoordinator
-    _api: SleepmeApiClient
-
     def __init__(self, coordinator: SleepmeDataUpdateCoordinator, idx: str) -> None:
         """Initialize the climate entity."""
         super().__init__(coordinator)
-
-        self._api = coordinator.config_entry.runtime_data.client
-
+        self.idx = idx
         data = coordinator.data[idx]
 
-        self.idx = idx
+        LOGGER.debug(f"Initializing SleepmeClimate with device info: {data}")
+
         self._name = data["name"]
         self._unique_id = f"{idx}_climate"
 
@@ -138,7 +128,6 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
         """Set the HVAC mode."""
         mode = "active" if hvac_mode == HVACMode.HEAT_COOL else "standby"
         LOGGER.debug(f"Setting HVAC mode to {mode}")
-        await self.coordinator.async_set_device_mode(self.idx, mode)
 
         if mode == "active":
             self._state = HVACMode.HEAT_COOL
