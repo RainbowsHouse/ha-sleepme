@@ -1,5 +1,5 @@
 {
-  "domain": "sleepme",
+  "domain": "sleepme_thermostat",
   "name": "Sleep.me",
   "after_dependencies": [],
   "codeowners": ["@rainbowshouse"],

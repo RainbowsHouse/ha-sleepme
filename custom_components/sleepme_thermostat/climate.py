@@ -6,7 +6,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from .api import SleepmeApiClient
 from .const import LOGGER
+from .coordinator import SleepmeDataUpdateCoordinator
 from .data import SleepmeConfigEntry
 
 
@@ -17,16 +19,28 @@ async def async_setup_entry(
 ) -> None:
     coordinator = config_entry.runtime_data.coordinator
 
+    devices = coordinator.data
+    LOGGER.debug(f"Climate Devices: {devices}")
+
     async_add_entities(
         [SleepmeClimate(coordinator, idx) for idx, ent in coordinator.data.items()]
     )
 
 
 class SleepmeClimate(CoordinatorEntity, ClimateEntity):
-    def __init__(self, coordinator, idx):
+    """Sleep.me Climate Entity."""
+
+    coordinator: SleepmeDataUpdateCoordinator
+    _api: SleepmeApiClient
+
+    def __init__(self, coordinator: SleepmeDataUpdateCoordinator, idx: str):
         super().__init__(coordinator)
-        self._idx = idx
+
+        self._api = coordinator.config_entry.runtime_data.client
+
         data = coordinator.data[idx]
+
+        self.idx = idx
         self._name = data["name"]
         self._unique_id = f"{idx}_climate"
 
@@ -65,13 +79,13 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
     @property
     def current_temperature(self):
         try:
-            status = self.coordinator.data[self._idx].get("status", {})
-            LOGGER.debug(f"Status for device {self._idx}: {status}")
+            status = self.coordinator.data[self.idx].get("status", {})
+            LOGGER.debug(f"Status for device {self.idx}: {status}")
             self._current_temperature = status.get("water_temperature_f")
             return status.get("water_temperature_f")
         except KeyError:
             LOGGER.error(
-                f"Error fetching current temperature for device {self._idx}: {self.coordinator.data[self._idx]}"
+                f"Error fetching current temperature for device {self.idx}: {self.coordinator.data[self.idx]}"
             )
             return None
 
@@ -85,7 +99,7 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
             temperature = int(temperature)
             LOGGER.debug(f"Setting target temperature to {temperature}F")
             # await self.hass.async_add_executor_job(
-            #     self._api.set_device_temperature, self._idx, temperature
+            #     self._api.set_device_temperature, self.idx, temperature
             # )
             self._target_temperature = temperature
             self.async_write_ha_state()  # Update the state immediately
@@ -94,8 +108,8 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
     def hvac_mode(self):
         # return HVACMode.HEAT_COOL if self._state else HVACMode.OFF
         try:
-            control = self.coordinator.data[self._idx].get("control", {})
-            LOGGER.debug(f"Control for device {self._idx}: {control}")
+            control = self.coordinator.data[self.idx].get("control", {})
+            LOGGER.debug(f"Control for device {self.idx}: {control}")
             return (
                 HVACMode.HEAT_COOL
                 if control.get("thermal_control_status") == "active"
@@ -103,16 +117,14 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
             )
         except KeyError:
             LOGGER.error(
-                f"Error fetching HVAC mode for device {self._idx}: {self.coordinator.data[self._idx]}"
+                f"Error fetching HVAC mode for device {self.idx}: {self.coordinator.data[self.idx]}"
             )
             return HVACMode.OFF
 
     async def async_set_hvac_mode(self, hvac_mode):
         mode = "active" if hvac_mode == HVACMode.HEAT_COOL else "standby"
         LOGGER.debug(f"Setting HVAC mode to {mode}")
-        # await self.hass.async_add_executor_job(
-        #     self._api.set_device_mode, self._idx, mode
-        # )
+        await self.coordinator.async_set_device_mode(self.idx, mode)
 
         if mode == "active":
             self._state = HVACMode.HEAT_COOL
@@ -123,7 +135,7 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
 
     async def async_update(self):
         await self.coordinator.async_request_refresh()
-        device_state = self.coordinator.data[self._idx]
+        device_state = self.coordinator.data[self.idx]
         self._state = (
             device_state.get("control", {}).get("thermal_control_status") == "active"
         )

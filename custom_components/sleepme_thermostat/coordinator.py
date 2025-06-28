@@ -23,6 +23,13 @@ class SleepmeDataUpdateCoordinator(DataUpdateCoordinator):
     config_entry: SleepmeConfigEntry
     _devices: list[dict]
 
+    async def async_set_device_mode(self, device_id: str, mode: str) -> None:
+        """Set the device mode."""
+        control = await self.config_entry.runtime_data.client.async_set_device_mode(
+            device_id, mode
+        )
+        self.data[device_id]["control"] = control
+
     async def _async_setup(self):
         """Set up the coordinator
 

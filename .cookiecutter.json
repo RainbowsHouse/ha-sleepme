@@ -1,7 +1,7 @@
 {
   "_template": "gh:oncleben31/cookiecutter-homeassistant-custom-component",
   "class_name_prefix": "Sleepme",
-  "domain_name": "sleepme",
+  "domain_name": "sleepme_thermostat",
   "friendly_name": "Sleepme",
   "github_user": "justinrainbow",
   "project_name": "ha-sleepme",
