@@ -55,7 +55,7 @@ class SleepmeDataUpdateCoordinator(DataUpdateCoordinator):
                 for device in self._devices:
                     device_id = device["id"]
                     data = await api.async_get_device_state(device_id)
-                    results[device_id] = data
+                    results[device_id] = {**device, **data}
                     LOGGER.info(
                         f"Device {device['name']} state: "
                         f"{json.dumps(results[device_id], indent=2)}"
