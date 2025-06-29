@@ -10,6 +10,7 @@ from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from .api import SleepmeApiClient, SleepmeApiClientError
 from .const import (
     CONF_API_KEY,
+    CONF_DEVICES,
     CONF_UPDATE_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
@@ -18,11 +19,34 @@ from .const import (
 from .data import SleepmeConfigEntry
 
 
+async def validate_api_key(hass: HomeAssistant, api_key: str) -> list[dict[str, Any]]:
+    """Validate the API key."""
+    try:
+        session = async_create_clientsession(hass)
+        client = SleepmeApiClient(api_key, session)
+        return await client.async_get_devices()
+    except Exception:  # noqa: BLE001
+        return []
+
+
+AUTH_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_API_KEY): str,
+        vol.Required(
+            CONF_UPDATE_INTERVAL,
+            default=DEFAULT_SCAN_INTERVAL,
+        ): int,
+    }
+)
+
+
 class SleepmeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for Sleep.me."""
 
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
+
+    data: dict[str, Any] | None = None
 
     def __init__(self) -> None:
         """Initialize the config flow."""
@@ -32,7 +56,7 @@ class SleepmeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
         """Handle a flow initialized by the user."""
-        self._errors = {}
+        errors: dict[str, str] = {}
 
         if user_input is not None:
             try:
@@ -40,15 +64,32 @@ class SleepmeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 if len(devices) > 0:
                     await self.async_set_unique_id(user_input[CONF_API_KEY])
                     return self.async_create_entry(title="Sleep.me", data=user_input)
-                self._errors["base"] = "no_devices"
+
+                errors["base"] = "no_devices"
             except SleepmeApiClientError:
-                self._errors["base"] = "auth"
+                errors["base"] = "auth"
             except Exception:  # noqa: BLE001
-                self._errors["base"] = "unknown"
+                errors["base"] = "unknown"
 
-            return await self._show_config_form(user_input)
+            if not errors:
+                self.data = user_input
+                self.data[CONF_DEVICES] = []
 
-        return await self._show_config_form(user_input)
+            return await self.async_step_devices(user_input)
+
+        return await self._show_config_form(
+            None,
+            errors=errors,
+        )
+
+    async def async_step_devices(
+        self,
+        user_input: dict[str, Any] | None = None,  # noqa: ARG002
+    ) -> config_entries.ConfigFlowResult:
+        """Handle the devices step."""
+        return self.async_show_form(
+            step_id="devices",
+        )
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
@@ -91,6 +132,7 @@ class SleepmeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def _show_config_form(
         self,
         user_input: dict[str, Any] | None,  # noqa: ARG002
+        errors: dict[str, str] | None = None,
     ) -> config_entries.ConfigFlowResult:
         """Show the configuration form to edit location data."""
         return self.async_show_form(
@@ -104,18 +146,8 @@ class SleepmeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     ): int,
                 }
             ),
-            errors=self._errors,
+            errors=errors,
         )
-
-
-async def validate_api_key(hass: HomeAssistant, api_key: str) -> list[dict[str, Any]]:
-    """Validate the API key."""
-    try:
-        session = async_create_clientsession(hass)
-        client = SleepmeApiClient(api_key, session)
-        return await client.async_get_devices()
-    except Exception:  # noqa: BLE001
-        return []
 
 
 class SleepmeOptionsFlowHandler(config_entries.OptionsFlow):

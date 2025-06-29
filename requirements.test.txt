@@ -1,0 +1,11 @@
+# From our manifest.json for our custom component
+requests>=2.31.0
+
+# Strictly for tests
+coverage==7.8.2
+pytest==8.4.0
+pytest-aioresponses==0.3.0
+pytest-asyncio==1.0.0
+pytest-cov==6.1.1
+pytest-homeassistant-custom-component==0.13.257
+homeassistant==2025.7.0b3
