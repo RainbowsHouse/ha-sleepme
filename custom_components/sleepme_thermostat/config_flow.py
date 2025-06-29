@@ -131,7 +131,7 @@ class SleepmeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def _show_config_form(
         self,
-        user_input: dict[str, Any] | None,  # noqa: ARG002
+        user_input: dict[str, Any] | None,
         errors: dict[str, str] | None = None,
     ) -> config_entries.ConfigFlowResult:
         """Show the configuration form to edit location data."""
@@ -142,7 +142,11 @@ class SleepmeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_API_KEY): str,
                     vol.Required(
                         CONF_UPDATE_INTERVAL,
-                        default=DEFAULT_SCAN_INTERVAL,
+                        default=user_input.get(
+                            CONF_UPDATE_INTERVAL, DEFAULT_SCAN_INTERVAL
+                        )
+                        if user_input
+                        else DEFAULT_SCAN_INTERVAL,
                     ): int,
                 }
             ),
