@@ -31,6 +31,7 @@ CONF_SLEEP_ME_DEVICE = "sleepme_state"
 CONF_ENABLED = "enabled"
 CONF_API_KEY = "api_key"
 CONF_UPDATE_INTERVAL = "update_interval"
+CONF_DEVICES = "devices"
 
 # Defaults
 DEFAULT_NAME = DOMAIN
@@ -44,6 +45,10 @@ SENSOR_TYPES = {
 
 BINARY_SENSOR_TYPES = {"is_water_low": "Is Water Low", "is_connected": "Connected"}
 
+PRESET_MAX_COOL = "Max Cool"
+PRESET_MAX_HEAT = "Max Heat"
+
+PRESET_TEMPERATURES = {PRESET_MAX_COOL: -1, PRESET_MAX_HEAT: 999}
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------

@@ -7,4 +7,5 @@ set -e
 cd "$(dirname "$0")/.."
 
 pip3 install --requirement requirements.txt
+pip3 install --requirement requirements.test.txt
 pre-commit install

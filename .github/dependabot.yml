@@ -1,13 +1,26 @@
 version: 2
 updates:
-  - package-ecosystem: github-actions
+  - package-ecosystem: pip
     directory: "/"
     schedule:
       interval: weekly
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: weekly
+      time: "06:00"
+      timezone: "America/Phoenix"
+    labels:
+      - "dependencies"
+      - "python"
     ignore:
       # Dependabot should not update Home Assistant as that should match the homeassistant key in hacs.json
       - dependency-name: "homeassistant"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: github-actions
+    directory: "/.github/workflows"
+    schedule:
+      interval: weekly
+      time: "06:00"
+      timezone: "America/Phoenix"
+    labels:
+      - "dependencies"
+      - "github_actions"
+    open-pull-requests-limit: 10

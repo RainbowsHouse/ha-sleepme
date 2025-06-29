@@ -27,6 +27,11 @@ PLATFORMS: list[Platform] = [
 ]
 
 
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:  # noqa: ARG001
+    """Set up the Sleep.me Thermostat component."""
+    return True
+
+
 # https://developers.home-assistant.io/docs/config_entries_index/#setting-up-an-entry
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -43,7 +48,7 @@ async def async_setup_entry(
         hass=hass,
         logger=LOGGER,
         name=DOMAIN,
-        update_interval=timedelta(minutes=entry.data[CONF_UPDATE_INTERVAL]),
+        update_interval=timedelta(minutes=entry.data.get(CONF_UPDATE_INTERVAL, 10)),
     )
 
     entry.runtime_data = SleepmeData(

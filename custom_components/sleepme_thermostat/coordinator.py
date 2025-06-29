@@ -42,7 +42,7 @@ class SleepmeDataUpdateCoordinator(DataUpdateCoordinator):
         """
         self._devices = await self.config_entry.runtime_data.client.async_get_devices()
 
-        LOGGER.info(f"Devices: {[device['name'] for device in self._devices]}")
+        LOGGER.debug(f"Devices: {[device['name'] for device in self._devices]}")
 
     async def _async_update_data(self) -> Any:
         """Update data via library."""
@@ -56,7 +56,7 @@ class SleepmeDataUpdateCoordinator(DataUpdateCoordinator):
                     device_id = device["id"]
                     data = await api.async_get_device_state(device_id)
                     results[device_id] = {**device, **data}
-                    LOGGER.info(
+                    LOGGER.debug(
                         f"Device {device['name']} state: "
                         f"{json.dumps(results[device_id], indent=2)}"
                     )

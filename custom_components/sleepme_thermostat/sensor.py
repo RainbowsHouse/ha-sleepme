@@ -46,6 +46,7 @@ class SleepmeSensor(CoordinatorEntity, SensorEntity):
 
         self._name = f"{data['name']} {SENSOR_TYPES[sensor_type]}"
         self._unique_id = f"{idx}_{sensor_type}"
+        self._device_id = f"{idx}_climate"
 
         LOGGER.info(
             f"Initializing SleepmeSensor with device info: "

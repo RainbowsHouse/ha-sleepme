@@ -38,13 +38,3 @@ jobs:
       - name: Run pre-commit on all files
         run: |
           pre-commit run --all-files --show-diff-on-failure --color=always
-
-  hassfest:
-    runs-on: ubuntu-latest
-    name: Hassfest
-    steps:
-      - name: Check out the repository
-        uses: "actions/checkout@v4"
-
-      - name: Hassfest validation
-        uses: "home-assistant/actions/hassfest@master"

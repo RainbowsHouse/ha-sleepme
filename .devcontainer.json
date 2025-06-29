@@ -15,11 +15,13 @@
     "vscode": {
       "extensions": [
         "charliermarsh.ruff",
+        "github.vscode-github-actions",
         "github.vscode-pull-request-github",
         "ms-python.python",
-        "ms-vscode-remote.remote-containers",
         "ms-python.vscode-pylance",
-        "ryanluker.vscode-coverage-gutters"
+        "ms-vscode-remote.remote-containers",
+        "ryanluker.vscode-coverage-gutters",
+        "tamasfe.even-better-toml"
       ],
       "settings": {
         "files.eol": "\n",

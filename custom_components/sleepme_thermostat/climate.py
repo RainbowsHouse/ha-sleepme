@@ -3,13 +3,17 @@
 from typing import Any
 
 from homeassistant.components.climate import ClimateEntity
-from homeassistant.components.climate.const import ClimateEntityFeature, HVACMode
+from homeassistant.components.climate.const import (
+    PRESET_NONE,
+    ClimateEntityFeature,
+    HVACMode,
+)
 from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import LOGGER
+from .const import DOMAIN, LOGGER, PRESET_MAX_COOL, PRESET_MAX_HEAT, PRESET_TEMPERATURES
 from .coordinator import SleepmeDataUpdateCoordinator
 from .data import SleepmeConfigEntry
 
@@ -38,10 +42,21 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
 
         self._name = data["name"]
         self._unique_id = f"{idx}_climate"
+        self._attr_unique_id = f"{DOMAIN}_{idx}_thermostat"
 
         self._state = data.get("control", {}).get("thermal_control_status") == "active"
         self._target_temperature = data.get("control", {}).get("set_temperature_f")
         self._current_temperature = data.get("status", {}).get("water_temperature_f")
+
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, idx)},
+            "name": self._name,
+            "manufacturer": "SleepMe",
+            "model": data.get("about", {}).get("model"),
+            "sw_version": data.get("about", {}).get("firmware_version"),
+            "connections": {("mac", data.get("about", {}).get("mac_address"))},
+            "serial_number": data.get("about", {}).get("serial_number"),
+        }
 
         LOGGER.debug(
             f"Initializing SleepmeClimate with device info: {coordinator.data[idx]}"
@@ -50,7 +65,12 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
     @property
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
-        return ClimateEntityFeature.TARGET_TEMPERATURE
+        return (
+            ClimateEntityFeature.TARGET_TEMPERATURE
+            | ClimateEntityFeature.TURN_ON
+            | ClimateEntityFeature.TURN_OFF
+            | ClimateEntityFeature.PRESET_MODE
+        )
 
     @property
     def hvac_modes(self) -> list[HVACMode]:
@@ -97,6 +117,25 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
         """Return the target temperature."""
         return self._target_temperature
 
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes."""
+        return {
+            "is_water_low": self.coordinator.data[self.idx]
+            .get("status", {})
+            .get("is_water_low"),
+            "is_connected": self.coordinator.data[self.idx]
+            .get("status", {})
+            .get("is_connected"),
+        }
+
+    @property
+    def available(self) -> bool:
+        """Return True if the device is connected, False otherwise."""
+        return (
+            self.coordinator.data[self.idx].get("status", {}).get("is_connected", False)
+        )
+
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set the target temperature."""
         temperature = kwargs.get("temperature")
@@ -124,6 +163,20 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
             )
             return HVACMode.OFF
 
+    @property
+    def preset_modes(self) -> list[str]:
+        """Return the list of available preset modes."""
+        return [PRESET_NONE, PRESET_MAX_HEAT, PRESET_MAX_COOL]
+
+    @property
+    def preset_mode(self) -> str | None:
+        """Return the current preset mode."""
+        if self.hvac_mode == HVACMode.OFF:
+            return PRESET_NONE
+        return self._determine_preset_mode(
+            self.coordinator.data[self.idx].get("control", {}).get("set_temperature_c")
+        )
+
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the HVAC mode."""
         mode = "active" if hvac_mode == HVACMode.HEAT_COOL else "standby"
@@ -149,3 +202,22 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
         self._current_temperature = device_state.get("status", {}).get(
             "water_temperature_f"
         )
+
+    def _sanitize_temperature(self, temp: float) -> float | None:
+        """Sanitize temperature values returned by the API."""
+        if temp in PRESET_TEMPERATURES.values():
+            return None
+        return temp
+
+    def _determine_hvac_mode(self, thermal_control_status: str) -> HVACMode:
+        """Determine the HVAC mode based on the device's thermal control status."""
+        if thermal_control_status == "active":
+            return HVACMode.HEAT_COOL
+        return HVACMode.OFF
+
+    def _determine_preset_mode(self, target_temperature: float) -> str:
+        """Determine the active preset mode, if any."""
+        for mode, target in PRESET_TEMPERATURES.items():
+            if target_temperature == target:
+                return mode
+        return PRESET_NONE

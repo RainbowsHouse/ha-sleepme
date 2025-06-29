@@ -36,7 +36,7 @@ Creates a virtual climate that controls an Sleep.me ChiliPad. This allows exposi
 2. Go to HACS `Integrations >` section
 3. Click `...` in top right of screen
 4. Click `Custom repositories`
-5. Add repository `amosyuen/ha-sleepme` in category `Integration`
+5. Add repository `rainbowshouse/ha-sleepme` in category `Integration`
 6. In the lower right click "+ Explore & Download repositories"
 7. Search for "Sleep.me" and add it
    - HA Restart is not needed since it is configured in UI config flow
@@ -49,8 +49,8 @@ Creates a virtual climate that controls an Sleep.me ChiliPad. This allows exposi
 
 1. Using the tool of choice open the directory (folder) for your [HA configuration](https://www.home-assistant.io/docs/configuration/) (where you find `configuration.yaml`).
 2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3. In the `custom_components` directory (folder) create a new folder called `sleepme`.
-4. Download _all_ the files from the `custom_components/sleepme/` directory (folder) in this repository.
+3. In the `custom_components` directory (folder) create a new folder called `sleepme_thermostat`.
+4. Download _all_ the files from the `custom_components/sleepme_thermostat/` directory (folder) in this repository.
 5. Place the files you downloaded in the new directory (folder) you created.
 6. Restart Home Assistant
 7. In the Home Assistant (HA) UI go to "Configuration"
@@ -60,7 +60,7 @@ Creates a virtual climate that controls an Sleep.me ChiliPad. This allows exposi
 
 ## Configuration
 
-1. Setup Home Assistant [Sleep.me](https://www.home-assistant.io/integrations/sleepme/) integration
+1. Setup Home Assistant [Sleep.me](https://www.home-assistant.io/integrations/sleepme_thermostat/) integration
 2. The integration will automatically discover unadded Sleepme entities. Select one.
 3. Choose a name for the entity
 4. Click `Submit`
