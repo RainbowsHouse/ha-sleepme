@@ -2,6 +2,8 @@
 
 import aiohttp
 import pytest
+from aioresponses import aioresponses
+from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.sleepme_thermostat.const import (
@@ -12,7 +14,7 @@ from custom_components.sleepme_thermostat.const import (
 
 
 @pytest.mark.asyncio
-async def test_sensor(hass, aioresponses):
+async def test_sensor(hass: HomeAssistant, aioresponses: aioresponses) -> None:
     """Test sensor."""
     aioresponses.get(
         "https://api.developer.sleep.me/v1/devices",
@@ -54,7 +56,7 @@ async def test_sensor(hass, aioresponses):
             },
         },
     )
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession():
         entry = MockConfigEntry(
             domain=DOMAIN,
             data={

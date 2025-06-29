@@ -173,7 +173,8 @@ class TestRateLimiter:
             # Should wait very little time
             with patch("asyncio.sleep") as mock_sleep:
                 await limiter.wait_for_reset()
-                # Use assert_called_once() and check the argument separately to handle floating point precision
+                # Use assert_called_once() and check the argument separately
+                # to handle floating point precision
                 assert mock_sleep.call_count == 1
                 actual_wait_time = mock_sleep.call_args[0][0]
                 assert (
@@ -185,7 +186,7 @@ class TestRateLimiter:
         limiter = RateLimiter(max_requests_per_minute=100)
         results = []
 
-        def worker():
+        def worker() -> None:
             """Worker function for thread safety test."""
             for _ in range(10):
                 if limiter.can_send_request():
@@ -227,17 +228,19 @@ class TestRateLimiter:
     def test_edge_case_very_large_requests_per_minute(self) -> None:
         """Test edge case with very large requests per minute."""
         limiter = RateLimiter(max_requests_per_minute=1000000)
+        total_requests = 1000
         # Should be able to make many requests
-        for _ in range(1000):
+        for _ in range(total_requests):
             assert limiter.can_send_request() is True
             limiter.record_request()
-        assert limiter.request_count == 1000
+        assert limiter.request_count == total_requests
 
     def test_concurrent_access_pattern(self) -> None:
         """Test realistic concurrent access pattern."""
-        limiter = RateLimiter(max_requests_per_minute=5)
+        max_requests_per_minute = 5
+        limiter = RateLimiter(max_requests_per_minute=max_requests_per_minute)
 
-        def concurrent_worker():
+        def concurrent_worker() -> None:
             """Worker that checks and records requests concurrently."""
             for _ in range(3):
                 if limiter.can_send_request():
@@ -256,4 +259,4 @@ class TestRateLimiter:
             thread.join()
 
         # Should not exceed the limit
-        assert limiter.request_count <= 5
+        assert limiter.request_count <= max_requests_per_minute

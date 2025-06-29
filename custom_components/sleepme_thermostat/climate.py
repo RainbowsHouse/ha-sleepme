@@ -118,7 +118,8 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
         return self._target_temperature
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes."""
         return {
             "is_water_low": self.coordinator.data[self.idx]
             .get("status", {})
@@ -129,7 +130,7 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
         }
 
     @property
-    def available(self):
+    def available(self) -> bool:
         """Return True if the device is connected, False otherwise."""
         return (
             self.coordinator.data[self.idx].get("status", {}).get("is_connected", False)
@@ -163,11 +164,13 @@ class SleepmeClimate(CoordinatorEntity, ClimateEntity):
             return HVACMode.OFF
 
     @property
-    def preset_modes(self):
+    def preset_modes(self) -> list[str]:
+        """Return the list of available preset modes."""
         return [PRESET_NONE, PRESET_MAX_HEAT, PRESET_MAX_COOL]
 
     @property
-    def preset_mode(self):
+    def preset_mode(self) -> str | None:
+        """Return the current preset mode."""
         if self.hvac_mode == HVACMode.OFF:
             return PRESET_NONE
         return self._determine_preset_mode(

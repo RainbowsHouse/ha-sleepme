@@ -7,6 +7,7 @@ from pytest_homeassistant_custom_component.components.diagnostics import (
 )
 from pytest_homeassistant_custom_component.typing import ClientSessionGenerator
 from syrupy.assertion import SnapshotAssertion
+from syrupy.types import PropertyName, PropertyPath
 
 from custom_components.sleepme_thermostat.const import (
     CONF_API_KEY,
@@ -28,7 +29,7 @@ TO_EXCLUDE = {
 }
 
 
-def limit_diagnostic_attrs(prop, path) -> bool:
+def limit_diagnostic_attrs(prop: PropertyName, path: PropertyPath) -> bool:  # noqa: ARG001
     """Mark attributes to exclude from diagnostic snapshot."""
     return prop in TO_EXCLUDE
 
