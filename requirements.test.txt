@@ -3,7 +3,7 @@ requests>=2.31.0
 
 # Strictly for tests
 aioresponses==0.7.8
-coverage==7.8.2
+coverage==7.9.1
 pytest==8.4.0
 pytest-aioresponses==0.3.0
 pytest-asyncio==1.0.0
