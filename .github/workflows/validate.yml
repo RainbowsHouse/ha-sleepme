@@ -34,3 +34,13 @@ jobs:
                 text:
                   type: "mrkdwn"
                   text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+
+  validate-hassfest:
+    runs-on: ubuntu-latest
+    name: Hassfest
+    steps:
+      - name: Check out the repository
+        uses: "actions/checkout@v4"
+
+      - name: Hassfest validation
+        uses: "home-assistant/actions/hassfest@master"
