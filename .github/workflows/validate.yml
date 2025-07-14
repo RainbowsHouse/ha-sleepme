@@ -23,7 +23,7 @@ jobs:
           category: "integration"
 
       - name: Post a message in a channel
-        uses: slackapi/slack-github-action@v2.1.0
+        uses: slackapi/slack-github-action@v2.1.1
         if: failure()
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
